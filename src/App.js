@@ -1,64 +1,47 @@
 import './App.css';
-import { Component } from 'react';
+// import { Component } from 'react';
 import CardList from './components/card-list/card-list.component';
 import SearchBox from './components/search-box/search-box.component';
-class App extends Component {
-  constructor() {
-    super();
+import { useState } from 'react';
+import { useEffect } from 'react';
 
-    // manage the state and create an array
-    this.state = {
-      monsters: [], // monsters from api
-      searchField: '' // filtered monsters 
-    };
-  }
+const App = () => {
 
-/* when the component mounts will fetch from api, then given a response transform that to json, then get the user,
-  change the state return to the array the associated user from api
-  * */
-  componentDidMount() {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
-      .then((user) =>
-        this.setState(
-          () => {
-            return { monsters: user };
-          },
-          () => {
-            console.log(this.state);
-          }
-        )
-      );
-
-          
-
-
-  }
-  onSaveChange = (event) => {
-            // console.log(event.target.value); // ABCSD
-            const searchField = event.target.value.toLocaleLowerCase(); // abcsd
-            this.setState(() => {
-              return { searchField};
-            });
-          }
+  const [searchField, setSearchField] = useState('')
+  const [monsters, setMonsters] = useState([])
+  const [filteredMonsters, setFilteredMonsters] = useState(monsters)
   
+  useEffect(()=>{
+    fetch('https://jsonplaceholder.typicode.com/users')
+    .then((response)=> response.json())
+    .then((user)=>{
+      setMonsters(user)
+    })
+  },[])
 
-  // render the elements
-  render() {
-    const {monsters, searchField} = this.state
-    const {onSaveChange} = this;
-     const filteredMonster = monsters.filter((monster) => {
-              return monster.name.toLocaleLowerCase().includes(searchField);
-            
-            });
-    return (
-      <div className="App">
+  useEffect(()=>{
+
+    const newFilteredMonster = monsters.filter((monster) => {
+    return monster.name.toLocaleLowerCase().includes(searchField);
+    });
+      setFilteredMonsters(newFilteredMonster);
+  },[searchField, monsters])
+
+    const onSaveChange = (event) => 
+    {
+      // console.log(event.target.value); // ABCSD
+      const searchFieldString= event.target.value.toLocaleLowerCase(); // abcsd
+      setSearchField(searchFieldString)
+    }
+  return (
+  <div className="App">
           <h1 className="app-title">Monsters Rolodex</h1>
         <SearchBox onSearchChange={onSaveChange} placeholder={'search monsters'} className='search-box'/>
-        <CardList monster={filteredMonster}/>
+        <CardList monster={filteredMonsters}/>
       </div>
-    );
-  }
+    )    
 }
 
 export default App;
+
+
